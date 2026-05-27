@@ -21,7 +21,7 @@ public partial class SetupRenderer
     public SetupRenderer(GameConfig config)
     {
         _config = config;
-        _itemCount = 9;
+        _itemCount = 10;
         _labels = new string[_itemCount];
         _increaseActions = new Action[_itemCount];
         _decreaseActions = new Action[_itemCount];
@@ -39,6 +39,10 @@ public partial class SetupRenderer
         AddRow(i++, "Balls per Arena", () => { if (_config.BallsPerArena < 12) _config.BallsPerArena++; },
             () => { if (_config.BallsPerArena > 1) _config.BallsPerArena--; },
             () => $"{_config.BallsPerArena}", @"^[1-9]$|^1[0-2]$");
+
+        AddRow(i++, "Value Cap (drop)", () => { _config.BallValueDropThreshold *= 2; },
+            () => { if (_config.BallValueDropThreshold > 64) _config.BallValueDropThreshold /= 2; },
+            () => FormatThreshold(_config.BallValueDropThreshold), @"^[1-9]\d*$");
 
         AddRow(i++, "Grid Size",
             () => { gsIdx = (gsIdx + 1) % gridSizes.Length; _config.GridWidth = gridSizes[gsIdx]; _config.GridHeight = gridSizes[gsIdx]; },
@@ -259,6 +263,8 @@ public partial class SetupRenderer
         Raylib.DrawText(text, (int)(r.X + r.Width / 2 - tw / 2), (int)(r.Y + 10), fs, Color.White);
     }
 
+    private static string FormatThreshold(long v) => v >= 1_000_000 ? $"{v / 1_000_000}M" : v >= 1_000 ? $"{v / 1_000}k" : v.ToString();
+
     private void ApplyEditValue(string val)
     {
         int idx = _selectedIndex;
@@ -266,13 +272,14 @@ public partial class SetupRenderer
         {
             case 0: if (int.TryParse(val, out int fc) && fc >= 2 && fc <= 8) _config.FactionCount = fc; break;
             case 1: if (int.TryParse(val, out int ba) && ba >= 1 && ba <= 12) _config.BallsPerArena = ba; break;
-            case 2: if (int.TryParse(val, out int gs) && gs >= 50 && gs <= 500) { _config.GridWidth = gs; _config.GridHeight = gs; } break;
-            case 3: if (int.TryParse(val, out int hp) && hp > 0) _config.StartingCampHealth = hp; break;
-            case 4: if (int.TryParse(val, out int pp) && pp > 0) _config.PelletsPerShotgun = pp; break;
-            case 5: if (int.TryParse(val, out int sa) && sa > 0 && sa <= 180) _config.ShotgunSpreadDegrees = sa; break;
-            case 6: if (int.TryParse(val, out int ps) && ps > 0) _config.PelletSpeed = ps; break;
-            case 7: if (int.TryParse(val, out int b) && b >= 0 && b <= 8) _config.PelletBounces = b; break;
-            case 8: if (float.TryParse(val, out float fr) && fr > 0) _config.CampFiringAngularSpeed = fr; break;
+            case 2: if (long.TryParse(val, out long vc) && vc > 0) _config.BallValueDropThreshold = vc; break;
+            case 3: if (int.TryParse(val, out int gs) && gs >= 50 && gs <= 500) { _config.GridWidth = gs; _config.GridHeight = gs; } break;
+            case 4: if (int.TryParse(val, out int hp) && hp > 0) _config.StartingCampHealth = hp; break;
+            case 5: if (int.TryParse(val, out int pp) && pp > 0) _config.PelletsPerShotgun = pp; break;
+            case 6: if (int.TryParse(val, out int sa) && sa > 0 && sa <= 180) _config.ShotgunSpreadDegrees = sa; break;
+            case 7: if (int.TryParse(val, out int ps) && ps > 0) _config.PelletSpeed = ps; break;
+            case 8: if (int.TryParse(val, out int b) && b >= 0 && b <= 8) _config.PelletBounces = b; break;
+            case 9: if (float.TryParse(val, out float fr) && fr > 0) _config.CampFiringAngularSpeed = fr; break;
         }
     }
 

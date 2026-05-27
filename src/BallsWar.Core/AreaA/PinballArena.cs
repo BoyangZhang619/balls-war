@@ -124,7 +124,7 @@ public class PinballArena
             _multiplierZones.Add(zoneL);
             SetupZoneContact(zoneL);
 
-            // Right side (mirror)
+            // Right side (mirror, same multiplier)
             float rightMidX = w - midX;
             var zoneR = new MultiplierZone(_nextZoneId++, new AEVector2(rightMidX, platformY),
                 World, segW, barH, ZoneShape.Rectangle, mults[i]);
@@ -224,6 +224,20 @@ public class PinballArena
             float spd = vel.Length();
             if (spd > maxSpeed)
                 ball.PhysicsBody.LinearVelocity = vel / spd * maxSpeed;
+
+            // Auto-drop if value exceeds threshold — teleport BELOW the hole
+            if (ball.CurrentValue > _config.BallValueDropThreshold)
+            {
+                float cx = Width / 2f;
+                float dropY = Height * 0.55f - 0.6f; // below the platform
+                ball.PhysicsBody.SetTransform(new AEVector2(cx, dropY), 0f);
+                float a = (float)(_rng.NextDouble() * Math.PI * 0.5f - Math.PI * 0.25f - Math.PI / 2);
+                ball.PhysicsBody.LinearVelocity = new AEVector2(
+                    MathF.Cos(a) * _config.BallInitialSpeed * 1.5f,
+                    MathF.Sin(a) * _config.BallInitialSpeed * 1.5f);
+                ball.StuckTimer = 0f;
+                ball.LastCheckPos = ball.PhysicsBody.Position;
+            }
         }
 
         // Process multiplier return queue — teleport balls back to spawn

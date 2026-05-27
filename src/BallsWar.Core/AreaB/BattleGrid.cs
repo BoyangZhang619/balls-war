@@ -15,7 +15,9 @@ public class BattleGrid
     public event Action<CampDamagedEvent>? CampDamaged;
     public event Action<CampDestroyedEvent>? CampDestroyed;
 
-    public List<(int X, int Y, int? OwnerId)> DirtyCells { get; } = new();
+    private List<(int, int, int?)> _dirtyA = new();
+    private List<(int, int, int?)> _dirtyB = new();
+    private bool _dirtySwap;
 
     public BattleGrid(Game.GameConfig config, int factionCount)
     {
@@ -51,7 +53,7 @@ public class BattleGrid
                     if (IsInBounds(cellX, cellY))
                     {
                         Cells[cellX, cellY].Capture(i);
-                        DirtyCells.Add((cellX, cellY, i));
+                        _dirtyA.Add((cellX, cellY, i));
                     }
                 }
             }
@@ -67,7 +69,7 @@ public class BattleGrid
         int? oldOwner = cell.OwnerFactionId;
         if (oldOwner == factionId) return false;
         cell.Capture(factionId);
-        DirtyCells.Add((x, y, factionId));
+        (_dirtySwap ? _dirtyB : _dirtyA).Add((x, y, factionId));
         return true;
     }
 
@@ -87,9 +89,10 @@ public class BattleGrid
 
     public List<(int X, int Y, int? OwnerId)> GetDirtyCellsAndClear()
     {
-        if (DirtyCells.Count == 0) return new List<(int, int, int?)>();
-        var copy = new List<(int, int, int?)>(DirtyCells);
-        DirtyCells.Clear();
-        return copy;
+        var current = _dirtySwap ? _dirtyB : _dirtyA;
+        var next = _dirtySwap ? _dirtyA : _dirtyB;
+        _dirtySwap = !_dirtySwap;
+        next.Clear();
+        return current;
     }
 }

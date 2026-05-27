@@ -86,11 +86,9 @@ public class GameWindow
                 {
                     _arenaRenderer.Render(_gameLoop.Arena, _layout.ArenaRect);
                     _gridRenderer.Render(_gameLoop.Grid, _layout.BattleGridRect);
-                    var pelletCounts = _gameLoop.Factions
-                        .Select(f => _gameLoop.Grid.PelletManager.ActivePellets
-                            .Count(p => p.FactionId == f.Id)).ToList();
+                    var counts = _gameLoop.Grid.PelletManager.PelletCountsByFaction;
                     _ui.RenderTopBar(_gameLoop.State, _gameLoop.Speed,
-                        _gameLoop.Factions, pelletCounts, _layout.TopBarRect);
+                        _gameLoop.Factions, counts, _layout.TopBarRect);
                     _ui.RenderBottomBar(_layout.BottomBarRect);
                 }
 

@@ -8,7 +8,7 @@ public class UiRenderer
 {
     public void RenderTopBar(GameState state, SimulationSpeed speed,
                               IReadOnlyList<Faction.Faction> factions,
-                              IReadOnlyList<int> pelletCounts, Rectangle rect)
+                              int[] pelletCounts, Rectangle rect)
     {
         Raylib.DrawRectangleRec(rect, new Color(15, 15, 20, 255));
 
@@ -30,7 +30,7 @@ public class UiRenderer
             if (f.IsEliminated) continue;
             var color = ColorMap.GetFactionColor(i);
             var camp = f.Camp;
-            int pc = i < pelletCounts.Count ? pelletCounts[i] : 0;
+            int pc = i < pelletCounts.Length ? pelletCounts[i] : 0;
             string text = $"{f.Name} HP:{camp.Health}  S:{pc}";
             Raylib.DrawText(text, x, (int)rect.Y + 10, 20, color);
             x += Raylib.MeasureText(text, 20) + 16;

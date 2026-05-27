@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BallsWar.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+728e32c4b2e3763b81cc7da6c20ba0ecb682c10f")]
 [assembly: System.Reflection.AssemblyProductAttribute("BallsWar.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BallsWar.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

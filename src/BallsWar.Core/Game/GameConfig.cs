@@ -12,7 +12,8 @@ public class GameConfig
     public float BallRadiusMeters { get; set; } = 0.15f;
     public float BallDensity { get; set; } = 1f;
     public float BallRestitution { get; set; } = 1.0f;
-    public float BallInitialSpeed { get; set; } = 3.5f;
+    public float BallInitialSpeed { get; set; } = 2.5f;
+    public long BallValueDropThreshold { get; set; } = 4096;
     public float RespawnDelaySeconds { get; set; } = 4f;
     public int MultiplierZoneCount { get; set; } = 6;
     public int ConversionZoneCount { get; set; } = 4;

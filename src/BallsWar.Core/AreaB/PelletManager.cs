@@ -6,12 +6,14 @@ public class PelletManager
     private readonly Game.GameConfig _config;
     private readonly List<ShotgunPellet> _pellets = new();
     private int _nextId;
-    private readonly Dictionary<int, HashSet<int>> _visitedCells = new();
     private float _fireTimer;
-
     private const int CampHitCost = 50;
 
     public IReadOnlyList<ShotgunPellet> ActivePellets => _pellets;
+    public int Count => _pellets.Count;
+
+    // Per-faction pellet counts for UI (updated each frame)
+    public int[] PelletCountsByFaction { get; private set; } = [];
 
     public PelletManager(BattleGrid grid, Game.GameConfig config)
     {
@@ -23,23 +25,16 @@ public class PelletManager
                               float firingAngle, int totalBudget)
     {
         if (count <= 0) return;
-
         int budgetPerPellet = Math.Max(10, totalBudget / count);
         float spreadRad = MathF.PI / 180f * _config.ShotgunSpreadDegrees / 2f;
-        float speed = _config.PelletSpeed;
-        int bounces = _config.PelletBounces;
 
         for (int i = 0; i < count; i++)
         {
-            float offset;
-            if (count == 1) offset = 0;
-            else offset = (i - (count - 1) / 2f) / ((count - 1) / 2f) * spreadRad;
-            float angle = firingAngle + offset;
-
-            var pellet = new ShotgunPellet(_nextId++, factionId, campX, campY,
-                angle, speed, bounces, budgetPerPellet);
-            _pellets.Add(pellet);
-            _visitedCells[pellet.Id] = new HashSet<int>();
+            float offset = count == 1 ? 0
+                : (i - (count - 1) / 2f) / ((count - 1) / 2f) * spreadRad;
+            _pellets.Add(new ShotgunPellet(_nextId++, factionId, campX, campY,
+                firingAngle + offset, _config.PelletSpeed,
+                _config.PelletBounces, budgetPerPellet));
         }
     }
 
@@ -47,6 +42,11 @@ public class PelletManager
     {
         _fireTimer += dt;
         float fireInterval = 1f / 60f;
+        int factionCount = _grid.Camps.Count;
+
+        // Ensure counts array is sized correctly
+        if (PelletCountsByFaction.Length != factionCount)
+            PelletCountsByFaction = new int[factionCount];
 
         while (_fireTimer >= fireInterval)
         {
@@ -56,12 +56,10 @@ public class PelletManager
                 if (camp.IsDestroyed || camp.ShotgunAmmo <= 0) continue;
                 camp.FiringAngle += camp.FiringAngularSpeed * fireInterval;
 
-                // totalBudget = current ammo (1 ammo = 1 potential bullet)
                 long totalBudget = camp.ShotgunAmmo;
                 int pelletCount = (int)Math.Max(1, totalBudget * _config.PelletsPerShotgun / 100);
                 SpawnPellets(camp.FactionId, pelletCount, camp.CenterX, camp.CenterY,
                     camp.FiringAngle, (int)Math.Min(int.MaxValue, totalBudget));
-                // Consume fired bullets from ammo pool
                 camp.ShotgunAmmo = Math.Max(0, camp.ShotgunAmmo - pelletCount);
             }
         }
@@ -73,17 +71,27 @@ public class PelletManager
             camp.FiringAngle += camp.FiringAngularSpeed * dt;
         }
 
-        // Update each pellet
+        // Update pellets and track per-faction counts in one pass
+        Array.Clear(PelletCountsByFaction);
+
         for (int i = _pellets.Count - 1; i >= 0; i--)
         {
             var p = _pellets[i];
-            if (p.Dead) { _visitedCells.Remove(p.Id); _pellets.RemoveAt(i); continue; }
 
-            if (p.CaptureBudget <= 0) { p.Kill(); continue; }
+            if (p.Dead || p.CaptureBudget <= 0)
+            {
+                // Swap-remove (O(1))
+                _pellets[i] = _pellets[^1];
+                _pellets.RemoveAt(_pellets.Count - 1);
+                continue;
+            }
 
             var camp = _grid.GetCamp(p.FactionId);
             if (camp.IsDestroyed) { p.Kill(); continue; }
 
+            PelletCountsByFaction[p.FactionId]++;
+
+            // Sub-cell movement
             float stepDist = p.Speed * dt;
             p.Accumulator += stepDist;
 
@@ -126,12 +134,9 @@ public class PelletManager
 
     private void ProcessCell(ShotgunPellet p, int gx, int gy)
     {
-        int cellHash = gy * _config.GridWidth + gx;
-        if (!_visitedCells[p.Id].Add(cellHash)) return; // already visited
+        ref var cell = ref _grid.Cells[gx, gy];
 
-        var cell = _grid.Cells[gx, gy];
-
-        // Check enemy camp center hit
+        // Enemy camp hit?
         if (cell.OwnerFactionId.HasValue && cell.OwnerFactionId != p.FactionId)
         {
             var enemyCamp = _grid.GetCamp(cell.OwnerFactionId.Value);
@@ -142,13 +147,12 @@ public class PelletManager
                 p.CaptureBudget -= CampHitCost;
                 if (destroyed) _grid.RaiseCampDestroyed(enemyCamp.FactionId);
                 else _grid.RaiseCampDamaged(enemyCamp.FactionId, _config.PelletDamage, enemyCamp.Health);
-
                 if (p.CaptureBudget <= 0) p.Kill();
                 return;
             }
         }
 
-        // Capture neutral or enemy cell
+        // Capture neutral/enemy — ownership check prevents re-capture budget drain
         if (!cell.OwnerFactionId.HasValue || cell.OwnerFactionId != p.FactionId)
         {
             _grid.CaptureCell(gx, gy, p.FactionId);
@@ -163,6 +167,6 @@ public class PelletManager
     public void Clear()
     {
         _pellets.Clear();
-        _visitedCells.Clear();
+        PelletCountsByFaction = [];
     }
 }
