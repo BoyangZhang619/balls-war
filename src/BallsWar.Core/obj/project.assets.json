@@ -1,0 +1,119 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {
+      "Aether.Physics2D/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Aether.Physics2D.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Aether.Physics2D.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Aether.Physics2D/2.1.0": {
+      "sha512": "Cy6fM5aDa6G4jh6zYPHnD744UqCJbZctwxTHpd0c7fh3gieul6OIeTxeEJagUSIKBE7ZwcSv1prC3JV9ehH4CQ==",
+      "type": "package",
+      "path": "aether.physics2d/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "aether.physics2d.2.1.0.nupkg.sha512",
+        "aether.physics2d.nuspec",
+        "icon.png",
+        "lib/net40/Aether.Physics2D.dll",
+        "lib/net40/Aether.Physics2D.xml",
+        "lib/net8.0/Aether.Physics2D.dll",
+        "lib/net8.0/Aether.Physics2D.xml",
+        "lib/netstandard2.0/Aether.Physics2D.dll",
+        "lib/netstandard2.0/Aether.Physics2D.xml"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0": [
+      "Aether.Physics2D >= 2.1.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\15685\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\gitLocal\\balls-war\\src\\BallsWar.Core\\BallsWar.Core.csproj",
+      "projectName": "BallsWar.Core",
+      "projectPath": "D:\\gitLocal\\balls-war\\src\\BallsWar.Core\\BallsWar.Core.csproj",
+      "packagesPath": "C:\\Users\\15685\\.nuget\\packages\\",
+      "outputPath": "D:\\gitLocal\\balls-war\\src\\BallsWar.Core\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\15685\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "dependencies": {
+          "Aether.Physics2D": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.314/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

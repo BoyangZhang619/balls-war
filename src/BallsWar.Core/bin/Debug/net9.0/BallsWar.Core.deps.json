@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "BallsWar.Core/1.0.0": {
+        "dependencies": {
+          "Aether.Physics2D": "2.1.0"
+        },
+        "runtime": {
+          "BallsWar.Core.dll": {}
+        }
+      },
+      "Aether.Physics2D/2.1.0": {
+        "runtime": {
+          "lib/net8.0/Aether.Physics2D.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BallsWar.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Aether.Physics2D/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Cy6fM5aDa6G4jh6zYPHnD744UqCJbZctwxTHpd0c7fh3gieul6OIeTxeEJagUSIKBE7ZwcSv1prC3JV9ehH4CQ==",
+      "path": "aether.physics2d/2.1.0",
+      "hashPath": "aether.physics2d.2.1.0.nupkg.sha512"
+    }
+  }
+}

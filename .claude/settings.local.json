@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(mkdir -p src/BallsWar.Core/AreaA)",
+      "Bash(mkdir -p src/BallsWar.Core/AreaB)",
+      "Bash(mkdir -p src/BallsWar.Core/Faction)",
+      "Bash(mkdir -p src/BallsWar.Core/Game)",
+      "Bash(mkdir -p src/BallsWar.Core/Events)",
+      "Bash(dotnet new sln *)",
+      "PowerShell(dotnet --version)",
+      "Bash(dotnet new classlib *)",
+      "Bash(dotnet new console *)",
+      "Bash(dotnet new xunit *)",
+      "Bash(dotnet sln *)",
+      "PowerShell(dotnet new sln *)",
+      "PowerShell(dotnet new classlib *)",
+      "PowerShell(dotnet new console *)",
+      "PowerShell(dotnet new xunit *)",
+      "PowerShell(dotnet sln *)",
+      "PowerShell(dotnet add *)",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell([System.Reflection.Assembly]::LoadFile\\(\"$env:USERPROFILE\\\\.nuget\\\\packages\\\\aether.physics2d\\\\2.1.0\\\\lib\\\\net8.0\\\\Aether.Physics2D.dll\"\\).GetTypes\\(\\) | Select-Object -First 20 Namespace | Where-Object { $_.Namespace -ne $null } | Select-Object -ExpandProperty Namespace -Unique | Sort-Object)",
+      "PowerShell(Copy-Item *)",
+      "PowerShell(Stop-Process *)"
+    ]
+  }
+}
