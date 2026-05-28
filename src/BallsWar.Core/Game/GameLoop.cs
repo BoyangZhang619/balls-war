@@ -109,7 +109,16 @@ public class GameLoop
     }
 
     private void OnCampDamaged(CampDamagedEvent e) { }
-    private void OnCampDestroyed(CampDestroyedEvent e) => State.OnFactionEliminated(e.FactionId);
+    private void OnCampDestroyed(CampDestroyedEvent e)
+    {
+        State.OnFactionEliminated(e.FactionId);
+        // Winner is the last surviving faction, not the eliminated one
+        if (State.Phase == GamePhase.Finished && State.WinnerFactionId == e.FactionId)
+        {
+            var survivor = _factions.FirstOrDefault(f => !f.IsEliminated);
+            State.WinnerFactionId = survivor?.Id;
+        }
+    }
     private bool CheckGameOver() => State.Phase == GamePhase.Finished;
 
     public void TogglePause() => State.TogglePause();

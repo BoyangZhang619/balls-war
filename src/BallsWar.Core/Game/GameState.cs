@@ -6,7 +6,7 @@ public class GameState
 {
     public GamePhase Phase { get; private set; } = GamePhase.Setup;
     public int ActiveFactionCount { get; private set; }
-    public int? WinnerFactionId { get; private set; }
+    public int? WinnerFactionId { get; set; }
     public float ElapsedTime { get; private set; }
 
     public void Start(int factionCount)
