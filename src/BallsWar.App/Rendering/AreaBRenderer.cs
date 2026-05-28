@@ -86,7 +86,24 @@ public class AreaBRenderer
             float px = screenRect.X + p.X * cs + cs / 2;
             float py = screenRect.Y + p.Y * cs + cs / 2;
             var color = ColorMap.GetFactionColor(p.FactionId);
-            Raylib.DrawCircle((int)px, (int)py, Math.Max(1, cs * 0.4f), color);
+            Raylib.DrawCircle((int)px, (int)py, Math.Max(2, cs * 0.8f), color);
+        }
+
+        // BigBalls
+        foreach (var bb in grid.BigBallManager.ActiveBalls)
+        {
+            if (bb.Dead) continue;
+            float bx = screenRect.X + bb.X * cs + cs / 2;
+            float by = screenRect.Y + bb.Y * cs + cs / 2;
+            float br = bb.VisualRadius * cs;
+            var fc = ColorMap.GetFactionColor(bb.FactionId);
+            fc.A = 180;
+            Raylib.DrawCircle((int)bx, (int)by, br, fc);
+            Raylib.DrawCircleLines((int)bx, (int)by, br, Color.White);
+            string valText = BallsWar.AreaA.Ball.FormatValue(bb.Value);
+            int fs = Math.Max(10, (int)(br * 0.8f));
+            int tw = Raylib.MeasureText(valText, fs);
+            Raylib.DrawText(valText, (int)bx - tw / 2, (int)by - fs / 2, fs, Color.White);
         }
     }
 

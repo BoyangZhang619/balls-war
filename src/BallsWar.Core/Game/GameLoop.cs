@@ -49,6 +49,7 @@ public class GameLoop
     public void Update(float frameDeltaTime)
     {
         if (State.Phase != GamePhase.Running) return;
+        if (Arena == null || Grid == null) return;
 
         int steps = Speed.StepsPerFrame(frameDeltaTime, Config.PhysicsTimestep);
 
@@ -85,6 +86,11 @@ public class GameLoop
 
             case ConversionType.Armor:
                 camp.AddHealth((int)(Config.ArmorPerConversion * e.BallValue));
+                break;
+
+            case ConversionType.BigBall:
+                Grid.BigBallManager.Spawn(e.FactionId, e.BallValue,
+                    camp.CenterX, camp.CenterY, new Random());
                 break;
         }
     }

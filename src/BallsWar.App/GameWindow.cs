@@ -25,8 +25,14 @@ public class GameWindow
     public void Run()
     {
         Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.VSyncHint);
-        Raylib.InitWindow(_width, _height, "Balls War");
-        Raylib.ToggleFullscreen();
+        Raylib.InitWindow(800, 450, "Balls War");
+
+        int monitorW = Raylib.GetMonitorWidth(0);
+        _width = monitorW / 2;
+        _height = _width * 9 / 16;
+        Raylib.SetWindowSize(_width, _height);
+        Raylib.SetWindowMinSize(800, 450);
+
         Raylib.SetTargetFPS(0);
         Raylib.SetExitKey(KeyboardKey.Null);
 
@@ -40,7 +46,12 @@ public class GameWindow
         {
             int w = Raylib.GetScreenWidth();
             int h = Raylib.GetScreenHeight();
-            if (w != _width || h != _height) { _width = w; _height = h; }
+            if (w != _width || h != _height)
+            {
+                _width = w;
+                _height = w * 9 / 16;
+                Raylib.SetWindowSize(_width, _height);
+            }
 
             if (_gameLoop.State.Phase == GamePhase.Setup)
             {
@@ -48,12 +59,12 @@ public class GameWindow
 
                 if (_setup.StartRequested)
                 {
+                    BallsWar.Game.ConfigStorage.Save(_gameLoop.Config);
                     _gameLoop.Initialize();
                     _layout = new LayoutManager(
                         _gameLoop.Config.GridWidth, _gameLoop.Config.GridHeight,
                         _width, _height);
                     _gridRenderer.Initialize(_gameLoop.Config.GridWidth, _gameLoop.Config.GridHeight);
-                    // Reset StartRequested for next time
                     _setup = new SetupRenderer(_gameLoop.Config);
                 }
 

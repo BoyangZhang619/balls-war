@@ -57,9 +57,9 @@ public partial class SetupRenderer
             () => { if (_config.PelletsPerShotgun > 4) _config.PelletsPerShotgun -= 4; },
             () => $"{_config.PelletsPerShotgun}", @"^[1-9]\d*$");
 
-        AddRow(i++, "Spread Angle", () => { if (_config.ShotgunSpreadDegrees < 90) _config.ShotgunSpreadDegrees += 5; },
-            () => { if (_config.ShotgunSpreadDegrees > 5) _config.ShotgunSpreadDegrees -= 5; },
-            () => $"{_config.ShotgunSpreadDegrees} deg", @"^[1-9]\d*$");
+        AddRow(i++, "Spread Angle", () => { _config.ShotgunSpreadDegrees = Math.Min(90f, _config.ShotgunSpreadDegrees * 2f); },
+            () => { _config.ShotgunSpreadDegrees = Math.Max(0.1f, _config.ShotgunSpreadDegrees / 2f); },
+            () => $"{_config.ShotgunSpreadDegrees:F1} deg", @"^[0-9]*\.?[0-9]*$");
 
         AddRow(i++, "Pellet Speed", () => { if (_config.PelletSpeed < 100) _config.PelletSpeed += 5; },
             () => { if (_config.PelletSpeed > 5) _config.PelletSpeed -= 5; },
@@ -276,7 +276,7 @@ public partial class SetupRenderer
             case 3: if (int.TryParse(val, out int gs) && gs >= 50 && gs <= 500) { _config.GridWidth = gs; _config.GridHeight = gs; } break;
             case 4: if (int.TryParse(val, out int hp) && hp > 0) _config.StartingCampHealth = hp; break;
             case 5: if (int.TryParse(val, out int pp) && pp > 0) _config.PelletsPerShotgun = pp; break;
-            case 6: if (int.TryParse(val, out int sa) && sa > 0 && sa <= 180) _config.ShotgunSpreadDegrees = sa; break;
+            case 6: if (float.TryParse(val, out float sa) && sa > 0 && sa <= 90) _config.ShotgunSpreadDegrees = sa; break;
             case 7: if (int.TryParse(val, out int ps) && ps > 0) _config.PelletSpeed = ps; break;
             case 8: if (int.TryParse(val, out int b) && b >= 0 && b <= 8) _config.PelletBounces = b; break;
             case 9: if (float.TryParse(val, out float fr) && fr > 0) _config.CampFiringAngularSpeed = fr; break;

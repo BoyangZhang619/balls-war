@@ -8,6 +8,7 @@ public class BattleGrid
     public int Height { get; }
     public GridCell[,] Cells { get; }
     public PelletManager PelletManager { get; }
+    public BigBallManager BigBallManager { get; }
     public IReadOnlyDictionary<int, Camp> Camps => _camps;
     private readonly Dictionary<int, Camp> _camps = new();
     private readonly Game.GameConfig _config;
@@ -26,6 +27,7 @@ public class BattleGrid
         Height = config.GridHeight;
         Cells = new GridCell[Width, Height];
         PelletManager = new PelletManager(this, config);
+        BigBallManager = new BigBallManager(this);
 
         InitializeCamps(factionCount);
     }
@@ -65,7 +67,7 @@ public class BattleGrid
     public bool CaptureCell(int x, int y, int factionId)
     {
         if (!IsInBounds(x, y)) return false;
-        var cell = Cells[x, y];
+        ref var cell = ref Cells[x, y];
         int? oldOwner = cell.OwnerFactionId;
         if (oldOwner == factionId) return false;
         cell.Capture(factionId);
@@ -85,7 +87,7 @@ public class BattleGrid
         CampDestroyed?.Invoke(new CampDestroyedEvent(factionId));
     }
 
-    public void Update(float dt) => PelletManager.Update(dt);
+    public void Update(float dt) { PelletManager.Update(dt); BigBallManager.Update(dt); }
 
     public List<(int X, int Y, int? OwnerId)> GetDirtyCellsAndClear()
     {

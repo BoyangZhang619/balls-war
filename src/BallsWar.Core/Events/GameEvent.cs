@@ -6,4 +6,4 @@ public record CellCapturedEvent(int X, int Y, int? OldOwnerFactionId, int NewOwn
 public record CampDamagedEvent(int FactionId, int Damage, int NewHealth, int _unused);
 public record CampDestroyedEvent(int FactionId);
 
-public enum ConversionType { Shotgun, Shield, Armor }
+public enum ConversionType { Shotgun, Shield, Armor, BigBall }

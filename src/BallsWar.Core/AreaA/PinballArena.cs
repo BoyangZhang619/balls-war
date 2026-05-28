@@ -17,11 +17,16 @@ public class PinballArena
     public IReadOnlyList<Ball> Balls => _balls;
     public IReadOnlyList<Zone> MultiplierZones => _multiplierZones;
     public IReadOnlyList<Zone> ConversionZones => _conversionZones;
+    public IReadOnlyList<(AEVector2 Pos, float Radius)> Pegs => _pegs;
+    public IReadOnlyList<(AEVector2 Pos, float Radius)> LowerObstacles => _lowerObs;
     private readonly List<Ball> _balls = new();
     private readonly List<Zone> _multiplierZones = new();
     private readonly List<Zone> _conversionZones = new();
     private readonly List<Ball> _deadBalls = new();
     private readonly List<Ball> _multiplierReturnQueue = new();
+    private readonly List<Ball> _overflowQueue = new();
+    private readonly List<(AEVector2, float)> _pegs = new();
+    private readonly List<(AEVector2, float)> _lowerObs = new();
     private readonly Game.GameConfig _config;
     private readonly Random _rng;
     private int _nextBallId;
@@ -41,6 +46,7 @@ public class PinballArena
         CreateWalls();
         CreateDividingPlatform();
         CreateMultiplierBars();
+        CreateLowerObstacles();
         CreateBottomBars();
         CreateBalls();
     }
@@ -98,63 +104,104 @@ public class PinballArena
         float leftPlatformEnd = center - holeHalfW;
         float halfWidth = leftPlatformEnd - leftEdge;
 
-        var mults = _config.MultiplierValues;
-        float[] weights = mults.Select(m => 1f / m).ToArray();
-        float weightSum = weights.Sum();
+        int[] mults = _config.MultiplierValues; // [8,4,2,2,2]
         float barH = 0.15f;
-        float totalForHalf = halfWidth;
+        float gap = 0.06f;
+        int n = mults.Length;
+        // Compute exact segment width to fill from leftEdge to leftPlatformEnd
+        float segW = (halfWidth - gap * (n - 1)) / n;
+        if (segW < 0.15f) segW = 0.15f;
 
-        // Create bars on LEFT side, then mirror to RIGHT side
-        // Use half the multipliers on each side
-        int halfCount = mults.Length / 2;
         float curX = leftEdge;
 
-        for (int i = 0; i < halfCount; i++)
+        for (int i = 0; i < n; i++)
         {
-            float segW = totalForHalf * weights[i] / weights.Take(halfCount).Sum();
-            if (segW < 0.3f) segW = 0.3f;
-            if (curX + segW > leftPlatformEnd) segW = leftPlatformEnd - curX - 0.05f;
-            if (segW < 0.2f) continue;
-
             float midX = curX + segW / 2;
 
-            // Left side
             var zoneL = new MultiplierZone(_nextZoneId++, new AEVector2(midX, platformY),
                 World, segW, barH, ZoneShape.Rectangle, mults[i]);
             _multiplierZones.Add(zoneL);
             SetupZoneContact(zoneL);
 
-            // Right side (mirror, same multiplier)
             float rightMidX = w - midX;
             var zoneR = new MultiplierZone(_nextZoneId++, new AEVector2(rightMidX, platformY),
                 World, segW, barH, ZoneShape.Rectangle, mults[i]);
             _multiplierZones.Add(zoneR);
             SetupZoneContact(zoneR);
 
-            curX += segW + 0.05f;
+            // Tall thin separator bar between multiplier strips
+            if (i < n - 1)
+            {
+                float pegX = curX + segW + gap / 2;
+                float pegY = platformY + 0.35f;
+                float pegHW = 0.06f, pegHH = 0.45f;
+                CreatePeg(new AEVector2(pegX, pegY), pegHW, pegHH);
+                CreatePeg(new AEVector2(w - pegX, pegY), pegHW, pegHH);
+            }
+
+            curX += segW + gap;
         }
     }
 
-    // ── Bottom Bars: Shotgun (left half) | Shield (right half) ──
+    private void CreatePeg(AEVector2 pos, float hw, float hh)
+    {
+        var body = new Body { BodyType = BodyType.Static, Position = pos };
+        var verts = PolygonTools.CreateRectangle(hw, hh);
+        var fixture = body.CreateFixture(new PolygonShape(verts, 1f));
+        fixture.Restitution = 1.0f;
+        fixture.Friction = 0f;
+        World.Add(body);
+        _pegs.Add((pos, hw)); // store half-width as "radius" for rendering
+    }
+
+    // ── Lower Obstacles: spread balls evenly across bottom zones ──
+
+    private void CreateLowerObstacles()
+    {
+        float w = Width, h = Height;
+        float platY = h * 0.55f;
+        float pegR = 0.18f;
+        float[] pegXs = { w * 0.20f, w * 0.35f, w * 0.50f, w * 0.65f, w * 0.80f };
+        for (int row = 0; row < 3; row++)
+        {
+            float py = platY - 1.0f - row * 1.2f;
+            float rowOffset = (row == 1) ? 0.45f : 0f; // middle row centered between top/bottom
+            for (int i = 0; i < pegXs.Length; i++)
+            {
+                float px = pegXs[i] + rowOffset;
+                if (px > w - 0.5f) px -= w * 0.6f;
+                var body = new Body { BodyType = BodyType.Static, Position = new AEVector2(px, py) };
+                var shape = new CircleShape(pegR, 1f);
+                var fixture = body.CreateFixture(shape);
+                fixture.Restitution = 1.0f;
+                fixture.Friction = 0f;
+                World.Add(body);
+                _lowerObs.Add((new AEVector2(px, py), pegR));
+            }
+        }
+    }
+
+    // ── Bottom Bars: Shotgun | BigBall | Shield, full width, no gap ──
 
     private void CreateBottomBars()
     {
         float w = Width;
-        float barY = 1.0f;
         float barH = 0.5f;
-        float margin = 0.4f;
-        float barW = (w - margin * 3) / 2f;
+        float barY = barH / 2f;
+        float unit = w / 8f; // ratio 3:2:3
+        float sw = unit * 3, bw = unit * 2, hw = unit * 3;
 
-        // Shotgun (left)
-        float sx = margin + barW / 2;
-        var sz = new ConversionZone(_nextZoneId++, new AEVector2(sx, barY), World, barW, barH,
+        var sz = new ConversionZone(_nextZoneId++, new AEVector2(sw / 2, barY), World, sw, barH,
             ZoneShape.Rectangle, ConversionType.Shotgun);
         _conversionZones.Add(sz);
         SetupZoneContact(sz);
 
-        // Shield (right)
-        float hx = w - margin - barW / 2;
-        var hz = new ConversionZone(_nextZoneId++, new AEVector2(hx, barY), World, barW, barH,
+        var bz = new ConversionZone(_nextZoneId++, new AEVector2(sw + bw / 2, barY), World, bw, barH,
+            ZoneShape.Rectangle, ConversionType.BigBall);
+        _conversionZones.Add(bz);
+        SetupZoneContact(bz);
+
+        var hz = new ConversionZone(_nextZoneId++, new AEVector2(w - hw / 2, barY), World, hw, barH,
             ZoneShape.Rectangle, ConversionType.Shield);
         _conversionZones.Add(hz);
         SetupZoneContact(hz);
@@ -215,28 +262,43 @@ public class PinballArena
     {
         World.Step(dt);
 
-        // Clamp ball speeds to prevent energy gain from solver
-        float maxSpeed = _config.BallInitialSpeed * 1.5f;
+        // Clamp ball speeds + airflow + value-drop
+        float maxSpeed = _config.BallInitialSpeed * 2f;
+        float holeX = Width / 2f;
+        float holeY = Height * 0.55f;
+        float holeRadius = 1.5f; // airflow zone radius
+
         foreach (var ball in _balls)
         {
             if (ball.State != BallState.Active) continue;
+
             var vel = ball.PhysicsBody.LinearVelocity;
             float spd = vel.Length();
             if (spd > maxSpeed)
                 ball.PhysicsBody.LinearVelocity = vel / spd * maxSpeed;
 
-            // Auto-drop if value exceeds threshold — teleport BELOW the hole
-            if (ball.CurrentValue > _config.BallValueDropThreshold)
+            var pos = ball.PhysicsBody.Position;
+
+            // Airflow at hole: high-value balls get pushed upward
+            float dx = pos.X - holeX;
+            float dy = pos.Y - holeY;
+            float dist = MathF.Sqrt(dx * dx + dy * dy);
+
+            if (dist < holeRadius)
             {
-                float cx = Width / 2f;
-                float dropY = Height * 0.55f - 0.6f; // below the platform
-                ball.PhysicsBody.SetTransform(new AEVector2(cx, dropY), 0f);
-                float a = (float)(_rng.NextDouble() * Math.PI * 0.5f - Math.PI * 0.25f - Math.PI / 2);
-                ball.PhysicsBody.LinearVelocity = new AEVector2(
-                    MathF.Cos(a) * _config.BallInitialSpeed * 1.5f,
-                    MathF.Sin(a) * _config.BallInitialSpeed * 1.5f);
-                ball.StuckTimer = 0f;
-                ball.LastCheckPos = ball.PhysicsBody.Position;
+                // Strong airflow: small balls pushed up, big balls pass through
+                float strength = 1f - Math.Min(1f, ball.CurrentValue / (float)_config.BallValueDropThreshold);
+                float force = _config.AirflowStrength * strength * (1f - dist / holeRadius);
+                ball.PhysicsBody.LinearVelocity += new AEVector2(0, force * dt);
+            }
+
+            // Value overflow: only trigger when ball is ABOVE the platform
+            if (ball.CurrentValue > _config.BallValueDropThreshold
+                && pos.Y > holeY + 0.3f)
+            {
+                _multiplierReturnQueue.Remove(ball);
+                if (!_overflowQueue.Contains(ball))
+                    _overflowQueue.Add(ball);
             }
         }
 
@@ -253,6 +315,21 @@ public class PinballArena
             }
         }
         _multiplierReturnQueue.Clear();
+
+        // Process overflow queue — drop balls through center hole
+        foreach (var ball in _overflowQueue)
+        {
+            if (ball.State == BallState.Active)
+            {
+                float cx = Width / 2f;
+                ball.CurrentValue = _config.BallValueDropThreshold;
+                ball.PhysicsBody.SetTransform(new AEVector2(cx, holeY - 1.2f), 0f);
+                ball.PhysicsBody.LinearVelocity = new AEVector2(0, -_config.BallInitialSpeed * 4f);
+                ball.StuckTimer = 0f;
+                ball.LastCheckPos = ball.PhysicsBody.Position;
+            }
+        }
+        _overflowQueue.Clear();
 
         for (int i = _balls.Count - 1; i >= 0; i--)
         {

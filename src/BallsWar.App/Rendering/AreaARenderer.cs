@@ -58,7 +58,13 @@ public class AreaARenderer
         {
             var cz = (ConversionZone)zone;
             var color = ColorMap.GetConversionColor(cz.ConversionType);
-            string label = cz.ConversionType == ConversionType.Shotgun ? "SHOTGUN" : "SHIELD";
+            string label = cz.ConversionType switch
+            {
+                ConversionType.Shotgun => "SHOTGUN",
+                ConversionType.Shield => "SHIELD",
+                ConversionType.BigBall => "BIGBALL",
+                _ => "?"
+            };
             var r = PhysRectToScreen(zone.Position, zone.Width, zone.Height, rect, sx, sy);
             Raylib.DrawRectangleRec(r, color);
             Raylib.DrawRectangleLinesEx(r, 2f, Color.White);
@@ -66,6 +72,54 @@ public class AreaARenderer
             int tw = Raylib.MeasureText(label, fs);
             Raylib.DrawText(label, (int)(r.X + r.Width / 2 - tw / 2),
                 (int)(r.Y + r.Height / 2 - fs / 2), fs, Color.White);
+        }
+
+        // Lower obstacles (small pegs)
+        foreach (var (pos, r) in arena.LowerObstacles)
+        {
+            float opx = rect.X + pos.X * sx;
+            float opy = rect.Y + (ah - pos.Y) * sy;
+            float opr = r * (sx + sy) / 2;
+            Raylib.DrawCircle((int)opx, (int)opy, Math.Max(2, opr), new Color(140, 140, 160, 180));
+            Raylib.DrawCircleLines((int)opx, (int)opy, Math.Max(2, opr), new Color(180, 180, 200, 200));
+        }
+
+        // Separator pegs (vertical rectangles)
+        foreach (var (pos, hw) in arena.Pegs)
+        {
+            float pw = hw * 2 * sx;
+            float ph = 0.45f * 2 * sy;
+            float ppx = rect.X + pos.X * sx - pw / 2;
+            float ppy = rect.Y + (ah - pos.Y) * sy - ph / 2;
+            Raylib.DrawRectangle((int)ppx, (int)ppy, (int)Math.Max(2, pw), (int)Math.Max(2, ph), new Color(180, 180, 200, 220));
+            Raylib.DrawRectangleLines((int)ppx, (int)ppy, (int)Math.Max(2, pw), (int)Math.Max(2, ph), Color.White);
+        }
+
+        // Airflow indicator at hole
+        float holeX = aw / 2;
+        float holeY = ah * 0.55f;
+        float holeScreenX = rect.X + holeX * sx;
+        float holeScreenY = rect.Y + (ah - holeY) * sy;
+        float holeR = 1.5f * (sx + sy) / 2;
+        float t = (float)Raylib.GetTime();
+
+        for (int j = 0; j < 6; j++)
+        {
+            float a = j * MathF.PI / 3 + t * 2f;
+            float dist = holeR * (0.3f + (float)((Math.Sin(t * 3 + j)) * 0.5 + 0.5) * 0.6f);
+            float ax = holeScreenX + MathF.Cos(a) * dist;
+            float ay = holeScreenY - MathF.Sin(a) * dist;
+            float arrowY = ay - 8;
+            Raylib.DrawLineEx(
+                new System.Numerics.Vector2(ax, ay),
+                new System.Numerics.Vector2(ax, arrowY),
+                2f, new Color(100, 180, 255, 160));
+            // Arrow head
+            Raylib.DrawTriangle(
+                new System.Numerics.Vector2(ax - 3, arrowY + 4),
+                new System.Numerics.Vector2(ax + 3, arrowY + 4),
+                new System.Numerics.Vector2(ax, arrowY),
+                new Color(100, 180, 255, 180));
         }
 
         // Balls (physics Y-up → screen Y-down), fixed size
