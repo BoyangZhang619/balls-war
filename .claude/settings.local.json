@@ -23,7 +23,10 @@
       "PowerShell(dotnet build *)",
       "PowerShell([System.Reflection.Assembly]::LoadFile\\(\"$env:USERPROFILE\\\\.nuget\\\\packages\\\\aether.physics2d\\\\2.1.0\\\\lib\\\\net8.0\\\\Aether.Physics2D.dll\"\\).GetTypes\\(\\) | Select-Object -First 20 Namespace | Where-Object { $_.Namespace -ne $null } | Select-Object -ExpandProperty Namespace -Unique | Sort-Object)",
       "PowerShell(Copy-Item *)",
-      "PowerShell(Stop-Process *)"
+      "PowerShell(Stop-Process *)",
+      "Bash(dotnet publish *)",
+      "Bash(git add *)",
+      "Bash(git rm *)"
     ]
   }
 }
