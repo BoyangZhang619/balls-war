@@ -176,7 +176,7 @@ public class BigBallManager
     }
 
     private static bool IsCampCenter(Camp camp, int x, int y)
-        => Math.Abs(x - camp.CenterX) <= 5 && Math.Abs(y - camp.CenterY) <= 5;
+        => Math.Abs(x - camp.CenterX) <= camp.HitRadius && Math.Abs(y - camp.CenterY) <= camp.HitRadius;
 
     public void Clear() => _balls.Clear();
 }

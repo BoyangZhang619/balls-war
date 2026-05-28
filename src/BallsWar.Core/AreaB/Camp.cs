@@ -6,6 +6,7 @@ public class Camp
     public int CenterX { get; }
     public int CenterY { get; }
     public int Health { get; private set; }
+    public int HitRadius { get; set; }
 
     /// Current firing direction in radians, rotates clockwise each frame.
     public float FiringAngle { get; set; }

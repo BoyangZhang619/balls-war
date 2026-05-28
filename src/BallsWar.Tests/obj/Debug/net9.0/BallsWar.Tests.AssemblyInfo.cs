@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BallsWar.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7485de50a38b08252b41736c19cf6f1131240ee2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41cd706b3c28849bd117d587ab917ca4ed02dc70")]
 [assembly: System.Reflection.AssemblyProductAttribute("BallsWar.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BallsWar.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

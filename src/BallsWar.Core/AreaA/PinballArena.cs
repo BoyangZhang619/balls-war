@@ -39,15 +39,17 @@ public class PinballArena
 
     public void OnFactionDestroyed(int factionId)
     {
-        foreach (var ball in _balls)
+        for (int i = _balls.Count - 1; i >= 0; i--)
         {
-            if (ball.FactionId == factionId && ball.State == BallState.Active)
+            if (_balls[i].FactionId == factionId)
             {
-                ball.Deactivate();
-                ball.RespawnTimer = float.MaxValue; // never respawn
-                _deadBalls.Add(ball);
+                _balls[i].Deactivate();
+                _balls.RemoveAt(i);
             }
         }
+        _deadBalls.RemoveAll(b => b.FactionId == factionId);
+        _multiplierReturnQueue.RemoveAll(b => b.FactionId == factionId);
+        _overflowQueue.RemoveAll(b => b.FactionId == factionId);
     }
 
     public PinballArena(Game.GameConfig config, Random rng)

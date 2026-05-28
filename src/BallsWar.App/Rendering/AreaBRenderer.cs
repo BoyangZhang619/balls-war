@@ -48,15 +48,17 @@ public class AreaBRenderer
 
         float cs = screenRect.Width / _gridW;
 
-        // Camp 11x11 overlay (semi-transparent territory)
+        // Camp territory overlay (semi-transparent, hit-radius sized)
         foreach (var camp in grid.Camps.Values)
         {
             if (camp.IsDestroyed) continue;
             var fc = ColorMap.GetFactionColor(camp.FactionId);
-            fc.A = 60;
-            float ox = screenRect.X + (camp.CenterX - 5) * cs;
-            float oy = screenRect.Y + (camp.CenterY - 5) * cs;
-            float os = 11 * cs;
+            // Darken
+            fc = new Color((byte)(fc.R * 2 / 3), (byte)(fc.G * 2 / 3), (byte)(fc.B * 2 / 3), (byte)100);
+            int hr = camp.HitRadius;
+            float ox = screenRect.X + (camp.CenterX - hr) * cs;
+            float oy = screenRect.Y + (camp.CenterY - hr) * cs;
+            float os = (hr * 2 + 1) * cs;
             Raylib.DrawRectangle((int)ox, (int)oy, (int)os, (int)os, fc);
         }
 

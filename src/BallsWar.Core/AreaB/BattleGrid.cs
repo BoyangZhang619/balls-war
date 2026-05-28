@@ -44,8 +44,11 @@ public class BattleGrid
             cy = System.Math.Clamp(cy, margin, Height - 1 - margin);
 
             var camp = new Camp(i, cx, cy, _config.StartingCampHealth);
+            int hitR = (int)(Math.Min(Width, Height) * 0.05f) + 1;
+            camp.HitRadius = hitR;
             _camps[i] = camp;
 
+            // Initialize camp territory cells
             for (int dx = -2; dx <= 2; dx++)
             {
                 for (int dy = -2; dy <= 2; dy++)
