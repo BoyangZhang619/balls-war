@@ -188,8 +188,11 @@ public class PinballArena
         float w = Width;
         float barH = 0.5f;
         float barY = barH / 2f;
-        float unit = w / 8f; // ratio 3:2:3
-        float sw = unit * 3, bw = unit * 2, hw = unit * 3;
+        var ratios = _config.BottomBarRatios;
+        float sum = ratios.Sum();
+        float sw = w * ratios[0] / sum;
+        float bw = w * ratios[1] / sum;
+        float hw = w * ratios[2] / sum;
 
         var sz = new ConversionZone(_nextZoneId++, new AEVector2(sw / 2, barY), World, sw, barH,
             ZoneShape.Rectangle, ConversionType.Shotgun);
@@ -323,8 +326,12 @@ public class PinballArena
             {
                 float cx = Width / 2f;
                 ball.CurrentValue = _config.BallValueDropThreshold;
-                ball.PhysicsBody.SetTransform(new AEVector2(cx, holeY - 1.2f), 0f);
-                ball.PhysicsBody.LinearVelocity = new AEVector2(0, -_config.BallInitialSpeed * 4f);
+                float offsetX = ((float)_rng.NextDouble() - 0.5f) * 0.6f;
+                float offsetAngle = ((float)_rng.NextDouble() - 0.5f) * 0.3f;
+                ball.PhysicsBody.SetTransform(new AEVector2(cx + offsetX, holeY - 1.2f), 0f);
+                ball.PhysicsBody.LinearVelocity = new AEVector2(
+                    MathF.Sin(offsetAngle) * _config.BallInitialSpeed * 2f,
+                    -MathF.Cos(offsetAngle) * _config.BallInitialSpeed * 4f);
                 ball.StuckTimer = 0f;
                 ball.LastCheckPos = ball.PhysicsBody.Position;
             }

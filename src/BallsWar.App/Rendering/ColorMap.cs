@@ -38,7 +38,6 @@ public static class ColorMap
     {
         ConversionType.Shotgun => new(255, 150, 50, 255),
         ConversionType.Shield => new(50, 200, 220, 255),
-        ConversionType.Armor => new(200, 100, 255, 255),
         ConversionType.BigBall => new(255, 220, 50, 255),
         _ => Color.White,
     };

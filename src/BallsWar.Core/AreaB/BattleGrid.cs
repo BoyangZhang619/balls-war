@@ -87,7 +87,21 @@ public class BattleGrid
         CampDestroyed?.Invoke(new CampDestroyedEvent(factionId));
     }
 
-    public void Update(float dt) { PelletManager.Update(dt); BigBallManager.Update(dt); }
+    public void Update(float dt)
+    {
+        // Shield decay: HP bleeds 0.2%/sec, harder to turtle forever
+        foreach (var camp in _camps.Values)
+        {
+            if (!camp.IsDestroyed && camp.Health > _config.ShieldDecayMinHealth)
+            {
+                int decay = Math.Max(1, (int)(camp.Health * _config.ShieldDecayPerSec * dt));
+                camp.TakeDamage(decay);
+                if (camp.IsDestroyed) RaiseCampDestroyed(camp.FactionId);
+            }
+        }
+        PelletManager.Update(dt);
+        BigBallManager.Update(dt);
+    }
 
     public List<(int X, int Y, int? OwnerId)> GetDirtyCellsAndClear()
     {

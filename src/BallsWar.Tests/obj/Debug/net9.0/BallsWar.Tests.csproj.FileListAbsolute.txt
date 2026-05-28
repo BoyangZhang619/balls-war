@@ -101,3 +101,4 @@ D:\gitLocal\balls-war\src\BallsWar.Tests\obj\Debug\net9.0\refint\BallsWar.Tests.
 D:\gitLocal\balls-war\src\BallsWar.Tests\obj\Debug\net9.0\BallsWar.Tests.pdb
 D:\gitLocal\balls-war\src\BallsWar.Tests\obj\Debug\net9.0\BallsWar.Tests.genruntimeconfig.cache
 D:\gitLocal\balls-war\src\BallsWar.Tests\obj\Debug\net9.0\ref\BallsWar.Tests.dll
+D:\gitLocal\balls-war\src\BallsWar.Tests\obj\Debug\net9.0\BallsWar.Tests.sourcelink.json

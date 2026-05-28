@@ -17,11 +17,12 @@ public partial class SetupRenderer
     private readonly string[] _validationPatterns;
     private readonly int _itemCount;
     public bool StartRequested { get; private set; }
+    public bool BackRequested { get; private set; }
 
     public SetupRenderer(GameConfig config)
     {
         _config = config;
-        _itemCount = 10;
+        _itemCount = 12;
         _labels = new string[_itemCount];
         _increaseActions = new Action[_itemCount];
         _decreaseActions = new Action[_itemCount];
@@ -72,6 +73,17 @@ public partial class SetupRenderer
         AddRow(i++, "Firing Rotation", () => { _config.CampFiringAngularSpeed += 0.2f; },
             () => { if (_config.CampFiringAngularSpeed > 0.1f) _config.CampFiringAngularSpeed -= 0.2f; },
             () => $"{_config.CampFiringAngularSpeed:F1} rad/s", @"^[0-9]+\.?[0-9]*$");
+
+        var ratioPresets = new[] { (1, 1, 1), (3, 2, 3), (1, 2, 1), (4, 1, 3), (2, 1, 1), (1, 1, 2) };
+        int rpIdx = 1;
+        AddRow(i++, "Bar Ratio (S:B:H)",
+            () => { rpIdx = (rpIdx + 1) % ratioPresets.Length; var r = ratioPresets[rpIdx]; _config.BottomBarRatios = new[] { r.Item1, r.Item2, r.Item3 }; },
+            () => { rpIdx = (rpIdx - 1 + ratioPresets.Length) % ratioPresets.Length; var r = ratioPresets[rpIdx]; _config.BottomBarRatios = new[] { r.Item1, r.Item2, r.Item3 }; },
+            () => $"{_config.BottomBarRatios[0]}:{_config.BottomBarRatios[1]}:{_config.BottomBarRatios[2]}", @"^\d+:\d+:\d+$");
+
+        AddRow(i++, "Language", () => { _config.LanguageIndex = (_config.LanguageIndex + 1) % 2; Strings.Current = _config.LanguageIndex == 1 ? Language.English : Language.Chinese; },
+            () => { _config.LanguageIndex = (_config.LanguageIndex + 1) % 2; Strings.Current = _config.LanguageIndex == 1 ? Language.English : Language.Chinese; },
+            () => _config.LanguageIndex == 0 ? "中文" : "English", @".*");
     }
 
     private void AddRow(int idx, string label, Action inc, Action dec, Func<string> getter, string pattern)
@@ -124,7 +136,7 @@ public partial class SetupRenderer
         if (Raylib.IsKeyPressed(KeyboardKey.Right)) _increaseActions[_selectedIndex]();
         if (Raylib.IsKeyPressed(KeyboardKey.Left)) _decreaseActions[_selectedIndex]();
         if (Raylib.IsKeyPressed(KeyboardKey.Enter)) StartRequested = true;
-        if (Raylib.IsKeyPressed(KeyboardKey.Escape)) System.Environment.Exit(0);
+        if (Raylib.IsKeyPressed(KeyboardKey.Escape)) BackRequested = true;
         if (Raylib.IsKeyPressed(KeyboardKey.Space)) StartRequested = true;
 
         // Check each row for click
@@ -162,7 +174,7 @@ public partial class SetupRenderer
         if (Raylib.CheckCollisionPointRec(mouse, startBtn) && Raylib.IsMouseButtonPressed(MouseButton.Left))
             StartRequested = true;
         if (Raylib.CheckCollisionPointRec(mouse, quitBtn) && Raylib.IsMouseButtonPressed(MouseButton.Left))
-            System.Environment.Exit(0);
+            BackRequested = true;
     }
 
     public void Render()
@@ -231,7 +243,7 @@ public partial class SetupRenderer
         // Bottom buttons
         int btnW = 180, btnH = 44, btnY = startY + _itemCount * lineH + 30;
         DrawButton(new Rectangle(centerX - 200, btnY, btnW, btnH), "START", new Color(30, 120, 30, 255), mouse);
-        DrawButton(new Rectangle(centerX + 20, btnY, btnW, btnH), "QUIT", new Color(120, 30, 30, 255), mouse);
+        DrawButton(new Rectangle(centerX + 20, btnY, btnW, btnH), "BACK", new Color(120, 80, 30, 255), mouse);
 
         // Faction color preview
         int prevX = sw / 2 + 320, prevY = startY;
@@ -280,6 +292,8 @@ public partial class SetupRenderer
             case 7: if (int.TryParse(val, out int ps) && ps > 0) _config.PelletSpeed = ps; break;
             case 8: if (int.TryParse(val, out int b) && b >= 0 && b <= 8) _config.PelletBounces = b; break;
             case 9: if (float.TryParse(val, out float fr) && fr > 0) _config.CampFiringAngularSpeed = fr; break;
+            case 10: if (val.Contains(':') && val.Split(':') is { Length: 3 } parts && int.TryParse(parts[0], out int r0) && int.TryParse(parts[1], out int r1) && int.TryParse(parts[2], out int r2) && r0 > 0 && r1 > 0 && r2 > 0) _config.BottomBarRatios = new[] { r0, r1, r2 }; break;
+            case 11: break;
         }
     }
 

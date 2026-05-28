@@ -21,26 +21,17 @@ public class InputHandler
         if (Raylib.IsKeyPressed(KeyboardKey.Four)) _gameLoop.Speed.SetSpeed(2f);
         if (Raylib.IsKeyPressed(KeyboardKey.Five)) _gameLoop.Speed.SetSpeed(4f);
         if (Raylib.IsKeyPressed(KeyboardKey.Six)) _gameLoop.Speed.SetSpeed(8f);
-
         if (Raylib.IsKeyPressed(KeyboardKey.Q)) _gameLoop.DecreaseSpeed();
         if (Raylib.IsKeyPressed(KeyboardKey.E)) _gameLoop.IncreaseSpeed();
-
-        if (Raylib.IsKeyPressed(KeyboardKey.R) &&
-            _gameLoop.State.Phase == GamePhase.Finished)
-        {
-            _gameLoop.Reset();
+        if (Raylib.IsKeyPressed(KeyboardKey.R) && _gameLoop.State.Phase == GamePhase.Finished)
             BackToSetupRequested = true;
-        }
 
         if (Raylib.IsKeyPressed(KeyboardKey.Escape))
         {
-            if (_gameLoop.State.Phase == GamePhase.Finished)
+            if (_gameLoop.State.Phase == GamePhase.Paused)
                 BackToSetupRequested = true;
             else
-            {
-                _gameLoop.Reset();
-                BackToSetupRequested = true;
-            }
+                _gameLoop.TogglePause();
         }
     }
 }

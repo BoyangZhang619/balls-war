@@ -81,11 +81,7 @@ public class GameLoop
                 break;
 
             case ConversionType.Shield:
-                camp.AddHealth((int)(Config.ShieldPerConversion * e.BallValue));
-                break;
-
-            case ConversionType.Armor:
-                camp.AddHealth((int)(Config.ArmorPerConversion * e.BallValue));
+                camp.AddHealth((int)e.BallValue);
                 break;
 
             case ConversionType.BigBall:
