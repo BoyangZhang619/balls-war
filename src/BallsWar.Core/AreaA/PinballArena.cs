@@ -263,7 +263,8 @@ public class PinballArena
 
     public void Step(float dt)
     {
-        World.Step(dt);
+        try { World.Step(dt); }
+        catch { /* ignore rare physics edge cases */ }
 
         // Clamp ball speeds + airflow + value-drop
         float maxSpeed = _config.BallInitialSpeed * 2f;

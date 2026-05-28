@@ -64,7 +64,13 @@ public class PelletManager
         for (int i = _pellets.Count - 1; i >= 0; i--)
         {
             var p = _pellets[i];
-            if (p.Dead) { _pellets[i] = _pellets[^1]; _pellets.RemoveAt(_pellets.Count - 1); continue; }
+            if (p.Dead)
+            {
+                _pellets[i] = _pellets[^1];
+                _pellets.RemoveAt(_pellets.Count - 1);
+                i++; // re-check the swapped-in element
+                continue;
+            }
 
             var camp = _grid.GetCamp(p.FactionId);
             if (camp.IsDestroyed) { p.Kill(); continue; }

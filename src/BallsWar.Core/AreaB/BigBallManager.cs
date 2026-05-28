@@ -41,7 +41,7 @@ public class BigBallManager
         for (int i = _balls.Count - 1; i >= 0; i--)
         {
             var b = _balls[i];
-            if (b.Dead) { _balls[i] = _balls[^1]; _balls.RemoveAt(_balls.Count - 1); continue; }
+            if (b.Dead) { _balls[i] = _balls[^1]; _balls.RemoveAt(_balls.Count - 1); i++; continue; }
 
             var camp = _grid.GetCamp(b.FactionId);
             if (camp.IsDestroyed || b.Value <= 0) { b.Kill(); continue; }

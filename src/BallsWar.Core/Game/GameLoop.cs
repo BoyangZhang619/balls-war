@@ -25,10 +25,12 @@ public class GameLoop
 
     public void Initialize()
     {
+        // Unsubscribe old events to prevent memory leaks
+        Cleanup();
+
         int count = Config.FactionCount;
         Grid = new BattleGrid(Config, count);
 
-        // One shared arena for all factions
         Arena = new PinballArena(Config, new Random(_rng.Next()));
         Arena.BallConverted += OnBallConverted;
 
@@ -44,6 +46,21 @@ public class GameLoop
         Grid.CampDestroyed += OnCampDestroyed;
 
         State.Start(count);
+    }
+
+    private void Cleanup()
+    {
+        if (Arena != null) Arena.BallConverted -= OnBallConverted;
+        if (Grid != null)
+        {
+            Grid.CampDamaged -= OnCampDamaged;
+            Grid.CampDestroyed -= OnCampDestroyed;
+            Grid.PelletManager.Clear();
+            Grid.BigBallManager.Clear();
+        }
+        _factions.Clear();
+        Arena = null!;
+        Grid = null!;
     }
 
     public void Update(float frameDeltaTime)
@@ -101,10 +118,7 @@ public class GameLoop
 
     public void Reset()
     {
-        _factions.Clear();
-        Grid?.PelletManager.Clear();
-        Grid = null!;
-        Arena = null!;
+        Cleanup();
         Speed.SetSpeed(1f);
     }
 }
