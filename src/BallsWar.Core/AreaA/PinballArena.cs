@@ -37,6 +37,19 @@ public class PinballArena
     public float Width => _config.ArenaWidthMeters;
     public float Height => _config.ArenaHeightMeters;
 
+    public void OnFactionDestroyed(int factionId)
+    {
+        foreach (var ball in _balls)
+        {
+            if (ball.FactionId == factionId && ball.State == BallState.Active)
+            {
+                ball.Deactivate();
+                ball.RespawnTimer = float.MaxValue; // never respawn
+                _deadBalls.Add(ball);
+            }
+        }
+    }
+
     public PinballArena(Game.GameConfig config, Random rng)
     {
         _config = config;

@@ -112,6 +112,7 @@ public class GameLoop
     private void OnCampDestroyed(CampDestroyedEvent e)
     {
         State.OnFactionEliminated(e.FactionId);
+        Arena.OnFactionDestroyed(e.FactionId);
         // Winner is the last surviving faction, not the eliminated one
         if (State.Phase == GamePhase.Finished && State.WinnerFactionId == e.FactionId)
         {
